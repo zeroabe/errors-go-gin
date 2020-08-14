@@ -9,8 +9,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/go-playground/validator.v9"
-
-	errs "github.com/microparts/errors-go"
 )
 
 const (
@@ -18,17 +16,17 @@ const (
 )
 
 //Response makes common error response
-func Response(c *gin.Context, err interface{}) {
-	errCode, data := MakeResponse(err, getLang(c))
-	resp := errs.Response{Error: *data}
+func MakeResponse(c *gin.Context, err interface{}) {
+	errCode, data := makeResponse(err, getLang(c))
+	resp := Response{Error: *data}
 	c.AbortWithStatusJSON(errCode, resp)
 }
 
 //MakeResponse makes ErrorObject based on error type
-func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
-	errObj := &errs.ErrorObject{}
+func makeResponse(err interface{}, lang langName) (int, *ErrorObject) {
+	errObj := &ErrorObject{}
 	errCode := http.StatusBadRequest
-	errType := errs.ErrorTypeError
+	errType := ErrorTypeError
 
 	switch et := err.(type) {
 	case GRPCValidationError:
@@ -47,11 +45,11 @@ func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
 		errCode = http.StatusUnprocessableEntity
 
 		errObj.Message = validationErrorMessage
-		errObj.Validation = makeErrorsSlice(et, lang)
+		errObj.Validation = makeErrorsSlice(et, lang, 0)
 	case error:
 		st := status.Convert(et)
 		if st.Code() != codes.Unknown {
-			return MakeResponse(UnwrapRPCError(st), lang)
+			return makeResponse(UnwrapRPCError(st), lang)
 		}
 
 		errCode, errObj.Message = getErrCode(et)
