@@ -18,12 +18,13 @@ type testCase struct {
 
 func TestValidationErrors(t *testing.T) {
 	type diveStruct struct {
-		Email string `json:"email_val" validate:"email"`
+		Email string `json:"email_val" validate:"email,max=10"`
 		Min   string `json:"min_val_test" validate:"min=1"`
 		Max   string `json:"max_val_test" validate:"max=4"`
 	}
 	type testStruct struct {
 		DiveTest []diveStruct `json:"dive_test" validate:"min=1,dive"`
+		Req      string       `json:"req_field" validate:"required"`
 	}
 
 	type testCase struct {
@@ -33,23 +34,33 @@ func TestValidationErrors(t *testing.T) {
 	var (
 		v     = validator.New()
 		cases = []testCase{
+			//{
+			//	name:  "zero dive",
+			//	value: testStruct{},
+			//},
+			//{
+			//	name: "one dive with invalid email",
+			//	value: testStruct{
+			//		DiveTest: []diveStruct{
+			//			{Email: "invalid", Min: "xxx", Max: "xxx"},
+			//		},
+			//	},
+			//},
+			//{
+			//	name: "one dive with invalid email and max",
+			//	value: testStruct{
+			//		DiveTest: []diveStruct{
+			//			{Email: "invalid", Min: "xxx", Max: "xxxxx"},
+			//		},
+			//	},
+			//},
 			{
-				name:  "zero dive",
-				value: testStruct{},
-			},
-			{
-				name: "one dive with invalid email",
+				name: "two dives with empty email and max",
 				value: testStruct{
+					Req: "foo",
 					DiveTest: []diveStruct{
-						{Email: "invalid", Min: "xxx", Max: "xxx"},
-					},
-				},
-			},
-			{
-				name: "one dive with invalid email and max",
-				value: testStruct{
-					DiveTest: []diveStruct{
-						{Email: "invalid", Min: "xxx", Max: "xxxxx"},
+						//{Email: "valid@mail.com", Min: "xxx", Max: "xxxx"},
+						{Email: "xxxxx@xxxxx.r", Min: "xxx", Max: "xxxx"},
 					},
 				},
 			},
@@ -72,6 +83,7 @@ func TestValidationErrors(t *testing.T) {
 
 			_, obj := makeResponse(verr, "en")
 			assert.NotNil(t, obj.Validation)
+			fmt.Printf("%+v", obj.Validation)
 		})
 	}
 }
