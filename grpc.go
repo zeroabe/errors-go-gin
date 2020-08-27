@@ -64,7 +64,7 @@ func WrapErrorWithStatus(err error, lang string) error {
 			var e error
 			br := &errdetails.BadRequest{}
 			for _, ee := range errs {
-				field := getFieldName(ee.Namespace(), 0)
+				field := getFieldName(ee.Namespace())
 				msg := getErrMessage(validationRule(ee.ActualTag()), field, ee.Param(), l)
 				violation := &errdetails.BadRequest_FieldViolation{
 					Field:       string(field),
