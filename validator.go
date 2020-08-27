@@ -29,7 +29,7 @@ var (
 			"gt":       "Свойство `%s` должно содержать более `%s` элементов",
 		},
 		"en": {
-			"ek":       "field `%s` is invalid: `%s`",
+			"ek":       "%s",
 			"required": "field `%s` is required",
 			"gt":       "field `%s` must contain more than `%s` elements",
 			"email":    "field `%s` is not valid email",
@@ -61,25 +61,33 @@ func getLang(c *gin.Context) langName {
 func makeErrorsSlice(err interface{}, lang langName, level int) map[FieldName]interface{} {
 	ve := make(map[FieldName]interface{})
 	for _, e := range err.(validator.ValidationErrors) {
-		fieldName, vee := processFieldError(e, lang)
+		_, vee := processFieldError(e, lang)
 		keys := splitNamespace(e.Namespace())[1:]
 
-		cur := mapWalk(ve, keys)
-		if cur == nil {
-			continue
-		}
-
-		cur[fieldName] = vee
+		mapWalk(ve, keys, vee)
 	}
 
 	return ve
 }
 
-func mapWalk(m map[FieldName]interface{}, keys []FieldName) map[FieldName]interface{} {
+func mapWalk(m map[FieldName]interface{}, keys []FieldName, er interface{}) map[FieldName]interface{} {
 	var (
 		ok  bool
 		cur map[FieldName]interface{}
 	)
+
+	if len(keys) == 1 {
+		if _, ok := m[keys[0]].([]interface{}); !ok {
+			m[keys[0]] = make([]interface{}, 0)
+		}
+
+		if v, ok := m[keys[0]].([]interface{}); ok {
+			v = append(v, er)
+			m[keys[0]] = v
+		}
+
+		return m
+	}
 
 	for i, k := range keys {
 		if i == 0 {
@@ -91,7 +99,26 @@ func mapWalk(m map[FieldName]interface{}, keys []FieldName) map[FieldName]interf
 				return nil
 			}
 
-			continue
+			if len(keys) > i+1 {
+				continue
+			}
+		}
+
+		if i+1 == len(keys) {
+			if _, ok = cur[k]; !ok {
+				if cur != nil {
+					cur[k] = make([]interface{}, 0)
+				}
+			}
+
+			if v, ok := cur[k].([]interface{}); ok {
+				v = append(v, er)
+				if cur != nil {
+					cur[k] = v
+				}
+			}
+
+			break
 		}
 
 		if _, ok := cur[k]; !ok {
@@ -163,7 +190,7 @@ func getErrMessage(errorType validationRule, field FieldName, param string, lang
 	}
 
 	if param != "" && errKey == "ek" {
-		return ValidationError(fmt.Sprintf(CommonValidationErrors[lang][errKey].string(), field, param))
+		return ValidationError(fmt.Sprintf(CommonValidationErrors[lang][errKey].string(), param))
 	}
 
 	params := []interface{}{field}
