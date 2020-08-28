@@ -34,26 +34,26 @@ func TestValidationErrors(t *testing.T) {
 	var (
 		v     = validator.New()
 		cases = []testCase{
-			//{
-			//	name:  "zero dive",
-			//	value: testStruct{},
-			//},
-			//{
-			//	name: "one dive with invalid email",
-			//	value: testStruct{
-			//		DiveTest: []diveStruct{
-			//			{Email: "invalid", Min: "xxx", Max: "xxx"},
-			//		},
-			//	},
-			//},
-			//{
-			//	name: "one dive with invalid email and max",
-			//	value: testStruct{
-			//		DiveTest: []diveStruct{
-			//			{Email: "invalid", Min: "xxx", Max: "xxxxx"},
-			//		},
-			//	},
-			//},
+			{
+				name:  "zero dive",
+				value: testStruct{},
+			},
+			{
+				name: "one dive with invalid email",
+				value: testStruct{
+					DiveTest: []diveStruct{
+						{Email: "invalid", Min: "xxx", Max: "xxx"},
+					},
+				},
+			},
+			{
+				name: "one dive with invalid email and max",
+				value: testStruct{
+					DiveTest: []diveStruct{
+						{Email: "invalid", Min: "xxx", Max: "xxxxx"},
+					},
+				},
+			},
 			{
 				name: "two dives with empty email and max",
 				value: testStruct{
