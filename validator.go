@@ -30,11 +30,11 @@ var (
 		},
 		"en": {
 			"ek":       "%s",
-			"required": "field `%s` is required",
-			"gt":       "field `%s` must contain more than `%s` elements",
-			"email":    "field `%s` is not valid email",
-			"min":      "length of `%s` field value is shorter then `%s`",
-			"max":      "length of `%s` field value is greater then `%s`",
+			"required": "is required",
+			"gt":       "must contain more than `%s` elements",
+			"email":    "is not valid email",
+			"min":      "value is shorter then `%s`",
+			"max":      "value is greater then `%s`",
 		},
 	}
 )
@@ -193,7 +193,7 @@ func getErrMessage(errorType validationRule, field FieldName, param string, lang
 		return ValidationError(fmt.Sprintf(CommonValidationErrors[lang][errKey].string(), param))
 	}
 
-	params := []interface{}{field}
+	params := make([]interface{}, 0)
 	if param != "" {
 		params = append(params, param)
 	}
